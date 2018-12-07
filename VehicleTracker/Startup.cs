@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using VehicleTracker.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace VehicleTracker
 {
@@ -35,7 +36,18 @@ namespace VehicleTracker
 
             services.AddDbContext<VehicleTrackerContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("VehicleTrackerContext")));
+            services.AddIdentity<User, IdentityRole>()
+            .AddEntityFrameworkStores<VehicleTrackerContext>();
 
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+            });
             services.AddTransient<IVehicleTrackerContext, VehicleTrackerContext>();
         }
 
@@ -51,6 +63,7 @@ namespace VehicleTracker
                 app.UseHsts();
             }
 
+            app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();
         }

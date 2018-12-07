@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace VehicleTracker.Models
 {
-    public class VehicleTrackerContext : DbContext, IVehicleTrackerContext
+    public class VehicleTrackerContext : IdentityDbContext<User>, IVehicleTrackerContext
     {
         public VehicleTrackerContext(DbContextOptions<VehicleTrackerContext> options)
             : base(options)
@@ -23,6 +24,8 @@ namespace VehicleTracker.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             Guid vehicleId = new Guid("62d65fe9-35d2-4529-983e-d8f92441dfd8");
             modelBuilder.Entity<Vehicle>().HasData(
                 new Vehicle
