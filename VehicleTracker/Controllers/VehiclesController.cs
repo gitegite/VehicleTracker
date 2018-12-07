@@ -20,14 +20,12 @@ namespace VehicleTracker.Controllers
             _context = context;
         }
 
-        // GET: api/Vehicles
         [HttpGet]
         public IEnumerable<Vehicle> GetAllVehicle()
         {
             return _context.Vehicle.Include(v => v.Locations).ToList();
         }
 
-        // GET: api/Vehicles/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVehicle([FromRoute] Guid id)
         {
@@ -46,7 +44,6 @@ namespace VehicleTracker.Controllers
             return Ok(vehicle);
         }
 
-        // PUT: api/Vehicles/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVehicle([FromRoute] Guid id, [FromBody] Vehicle vehicle)
         {
@@ -55,7 +52,8 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != vehicle.Id)
+            // vehicle's locations shouldn't be mutated once recorded
+            if (id != vehicle.Id || vehicle.Locations.Any())
             {
                 return BadRequest();
             }
@@ -81,7 +79,6 @@ namespace VehicleTracker.Controllers
             return NoContent();
         }
 
-        // POST: api/Vehicles
         [HttpPost]
         public async Task<IActionResult> PostVehicle([FromBody] Vehicle vehicle)
         {
@@ -91,6 +88,7 @@ namespace VehicleTracker.Controllers
             }
 
             _context.Vehicle.Add(vehicle);
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetVehicle", new { id = vehicle.Id }, vehicle);
