@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using VehicleTracker.Models;
 
-namespace VehicleTracker.Models
+namespace VehicleTracker.Data
 {
     public class VehicleTrackerContext : IdentityDbContext<User>, IVehicleTrackerContext
     {
@@ -43,6 +45,11 @@ namespace VehicleTracker.Models
                     Longitude = 200
                 }
             );
+
+            User user = new User
+            {
+                UserName = "John Doe"
+            };
         }
     }
 }

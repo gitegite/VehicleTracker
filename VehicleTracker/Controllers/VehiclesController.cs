@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VehicleTracker.Data;
 using VehicleTracker.Models;
 
 namespace VehicleTracker.Controllers

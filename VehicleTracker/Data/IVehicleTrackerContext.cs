@@ -2,8 +2,9 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Threading.Tasks;
+using VehicleTracker.Models;
 
-namespace VehicleTracker.Models
+namespace VehicleTracker.Data
 {
     public interface IVehicleTrackerContext : IDisposable
     {

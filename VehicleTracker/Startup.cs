@@ -13,6 +13,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using VehicleTracker.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
+using VehicleTracker.Data;
 
 namespace VehicleTracker
 {
@@ -38,7 +40,6 @@ namespace VehicleTracker
                     options.UseSqlServer(Configuration.GetConnectionString("VehicleTrackerContext")));
             services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<VehicleTrackerContext>();
-
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -49,10 +50,11 @@ namespace VehicleTracker
                 options.Password.RequiredUniqueChars = 1;
             });
             services.AddTransient<IVehicleTrackerContext, VehicleTrackerContext>();
+            services.AddTransient<DataSeeder>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, DataSeeder dataSeeder)
         {
             if (env.IsDevelopment())
             {
@@ -66,6 +68,7 @@ namespace VehicleTracker
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();
+            dataSeeder.SeedAdminUser();
         }
     }
 }
