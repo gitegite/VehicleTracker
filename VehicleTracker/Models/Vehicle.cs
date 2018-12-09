@@ -13,6 +13,9 @@ namespace VehicleTracker.Models
         [Required]
         public string Name { get; set; }
 
+        [Required]
+        public Guid UserId { get; set; }
+
         public ICollection<Location> Locations { get; set; }
     }
 }

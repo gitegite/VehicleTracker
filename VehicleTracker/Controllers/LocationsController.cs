@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,7 @@ namespace VehicleTracker.Controllers
         }
 
         [HttpGet("{id}/Date")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetVehicleLocationByDate([FromRoute] Guid id, [FromQuery] DateTime from, [FromQuery] DateTime to)
         {
             if (!ModelState.IsValid)
@@ -44,6 +46,7 @@ namespace VehicleTracker.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetCurrentVehicleLocation([FromRoute] Guid id)
         {
             if (!ModelState.IsValid)
@@ -72,10 +75,29 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
+            if (!VehicleExists(location.VehicleId))
+            {
+                return BadRequest("Vehicle not found");
+            }
+
+            var userId = new Guid(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            // Since one vehicle should have only one user, it's fine to use .Single here
+            if (location.VehicleId != _context.Vehicle.Single(v => v.UserId == userId).Id)
+            {
+                return BadRequest("Cannot update other vehicle's location");
+            }
+
+            location.TimeOfRecord = DateTime.UtcNow;
             _context.Location.Add(location);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLocation", new { id = location.VehicleId }, location);
+            return CreatedAtAction("GetCurrentVehicleLocation", new { id = location.VehicleId }, location);
+        }
+
+        private bool VehicleExists(Guid id)
+        {
+            return _context.Vehicle.Any(e => e.Id == id);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace VehicleTracker.Data
         {
             var user = new User
             {
-                UserName = "John Doe",
+                UserName = "email@email.com",
                 NormalizedUserName = "email@email.com",
                 Email = "Email@email.com",
                 NormalizedEmail = "email@email.com",
@@ -38,10 +38,15 @@ namespace VehicleTracker.Data
                 await roleStore.CreateAsync(new IdentityRole { Name = AdminRoleName, NormalizedName = AdminRoleName });
             }
 
+            if (!_context.Roles.Any(r => r.Name == "NormalUser"))
+            {
+                await roleStore.CreateAsync(new IdentityRole { Name = "NormalUser", NormalizedName = "normaluser" });
+            }
+
             if (!_context.Users.Any(u => u.UserName == user.UserName))
             {
                 var password = new PasswordHasher<User>();
-                user.PasswordHash = password.HashPassword(user, "Thispassw0rdIsHellaStrong");
+                user.PasswordHash = password.HashPassword(user, "ThispasswordIsHellaStr0ng");
                 var userStore = new UserStore<User>(_context);
                 await userStore.CreateAsync(user);
                 await userStore.AddToRoleAsync(user, AdminRoleName);

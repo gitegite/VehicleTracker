@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,7 @@ using VehicleTracker.Models;
 
 namespace VehicleTracker.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class VehiclesController : ControllerBase
@@ -88,6 +91,8 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
+            vehicle.UserId = new Guid(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
             _context.Vehicle.Add(vehicle);
 
             await _context.SaveChangesAsync();
@@ -95,7 +100,6 @@ namespace VehicleTracker.Controllers
             return CreatedAtAction("GetVehicle", new { id = vehicle.Id }, vehicle);
         }
 
-        // DELETE: api/Vehicles/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle([FromRoute] Guid id)
         {
