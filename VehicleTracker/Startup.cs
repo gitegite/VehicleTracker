@@ -41,6 +41,8 @@ namespace VehicleTracker
                         options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
                     );
 
+            services.AddHttpClient();
+
             services.AddDbContext<VehicleTrackerContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("VehicleTrackerContext")));
             services.AddIdentity<User, IdentityRole>()

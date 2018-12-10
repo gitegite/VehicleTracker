@@ -19,7 +19,7 @@ namespace VehicleTracker.Controllers
     {
         private readonly IVehicleTrackerService _vehicleTrackerService;
 
-        public LocationsController(IVehicleTrackerContext context, IVehicleTrackerService vehicleTrackerService)
+        public LocationsController(IVehicleTrackerService vehicleTrackerService)
         {
             _vehicleTrackerService = vehicleTrackerService;
         }

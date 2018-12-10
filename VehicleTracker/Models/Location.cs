@@ -16,10 +16,10 @@ namespace VehicleTracker.Models
         [Required]
         public decimal Longitude { get; set; }
 
+        public string RealAddress { get; set; }
         public DateTime TimeOfRecord { get; set; }
 
         public Guid VehicleId { get; set; }
-
         public Vehicle Vehicle { get; set; }
     }
 }
