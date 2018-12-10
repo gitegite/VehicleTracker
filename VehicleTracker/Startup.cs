@@ -19,6 +19,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using VehicleTracker.Services;
 
 namespace VehicleTracker
 {
@@ -54,6 +55,7 @@ namespace VehicleTracker
                 options.Password.RequiredUniqueChars = 1;
             });
             services.AddTransient<IVehicleTrackerContext, VehicleTrackerContext>();
+            services.AddTransient<IVehicleTrackerService, VehicleTrackerService>();
             services.AddTransient<DataSeeder>();
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims

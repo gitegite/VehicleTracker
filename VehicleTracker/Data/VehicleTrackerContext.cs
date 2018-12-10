@@ -28,12 +28,19 @@ namespace VehicleTracker.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            User user = new User
+            {
+                UserName = "John Doe",
+                Id = "1203521D-4FE4-4906-819B-C19016E42A03"
+            };
+
             Guid vehicleId = new Guid("62d65fe9-35d2-4529-983e-d8f92441dfd8");
             modelBuilder.Entity<Vehicle>().HasData(
                 new Vehicle
                 {
                     Id = vehicleId,
-                    Name = "Mercedes"
+                    Name = "Mercedes",
+                    UserId = user.Id
                 }
             );
             modelBuilder.Entity<Location>().HasData(
@@ -46,10 +53,10 @@ namespace VehicleTracker.Data
                 }
             );
 
-            User user = new User
-            {
-                UserName = "John Doe"
-            };
+            modelBuilder.Entity<User>()
+            .HasOne(u => u.Vehicle)
+            .WithOne(v => v.User)
+            .HasForeignKey<Vehicle>(v => v.UserId);
         }
     }
 }

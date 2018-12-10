@@ -18,7 +18,6 @@ namespace VehicleTracker.Models
 
         public DateTime TimeOfRecord { get; set; }
 
-        [Required]
         public Guid VehicleId { get; set; }
 
         public Vehicle Vehicle { get; set; }

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VehicleTracker.Data;
 using VehicleTracker.Models;
+using VehicleTracker.Services;
 
 namespace VehicleTracker.Controllers
 {
@@ -17,17 +18,11 @@ namespace VehicleTracker.Controllers
     [ApiController]
     public class VehiclesController : ControllerBase
     {
-        private readonly IVehicleTrackerContext _context;
+        private readonly IVehicleTrackerService _vehicleTrackerService;
 
-        public VehiclesController(IVehicleTrackerContext context)
+        public VehiclesController(IVehicleTrackerService vehicleTrackerService)
         {
-            _context = context;
-        }
-
-        [HttpGet]
-        public IEnumerable<Vehicle> GetAllVehicle()
-        {
-            return _context.Vehicle.Include(v => v.Locations).ToList();
+            _vehicleTrackerService = vehicleTrackerService;
         }
 
         [HttpGet("{id}")]
@@ -38,7 +33,7 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
-            var vehicle = await _context.Vehicle.FindAsync(id);
+            var vehicle = await _vehicleTrackerService.GetVehicleById(id);
 
             if (vehicle == null)
             {
@@ -62,23 +57,7 @@ namespace VehicleTracker.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(vehicle).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!VehicleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _vehicleTrackerService.UpdateVehicle(vehicle);
 
             return NoContent();
         }
@@ -91,11 +70,14 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
-            vehicle.UserId = new Guid(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            vehicle.UserId = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            _context.Vehicle.Add(vehicle);
+            if (await _vehicleTrackerService.GetVehicleByUser(vehicle.UserId) != null)
+            {
+                return BadRequest("Only one device per one vehicle allowed");
+            }
 
-            await _context.SaveChangesAsync();
+            await _vehicleTrackerService.RegisterVehicle(vehicle);
 
             return CreatedAtAction("GetVehicle", new { id = vehicle.Id }, vehicle);
         }
@@ -108,21 +90,15 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
-            var vehicle = await _context.Vehicle.FindAsync(id);
+            var vehicle = await _vehicleTrackerService.GetVehicleById(id);
             if (vehicle == null)
             {
                 return NotFound();
             }
 
-            _context.Vehicle.Remove(vehicle);
-            await _context.SaveChangesAsync();
+            await _vehicleTrackerService.RemoveVehicle(vehicle);
 
             return Ok(vehicle);
-        }
-
-        private bool VehicleExists(Guid id)
-        {
-            return _context.Vehicle.Any(e => e.Id == id);
         }
     }
 }

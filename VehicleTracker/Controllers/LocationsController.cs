@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VehicleTracker.Data;
 using VehicleTracker.Models;
+using VehicleTracker.Services;
 
 namespace VehicleTracker.Controllers
 {
@@ -16,11 +17,11 @@ namespace VehicleTracker.Controllers
     [ApiController]
     public class LocationsController : ControllerBase
     {
-        private readonly IVehicleTrackerContext _context;
+        private readonly IVehicleTrackerService _vehicleTrackerService;
 
-        public LocationsController(IVehicleTrackerContext context)
+        public LocationsController(IVehicleTrackerContext context, IVehicleTrackerService vehicleTrackerService)
         {
-            _context = context;
+            _vehicleTrackerService = vehicleTrackerService;
         }
 
         [HttpGet("{id}/Date")]
@@ -32,12 +33,9 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
-            var locations = await _context.Location
-                                .Where(l => l.TimeOfRecord >= from && l.TimeOfRecord >= to && l.VehicleId == id)
-                                .Select(l => new { l.Id, l.Latitude, l.Longitude, l.TimeOfRecord })
-                                .ToArrayAsync();
+            var locations = await _vehicleTrackerService.GetVehicleLocationByDate(id, from, to);
 
-            if (locations == null)
+            if (locations == null || !locations.Any())
             {
                 return NotFound();
             }
@@ -54,10 +52,7 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
-            var currentLocation = await _context.Location
-                                    .Where(l => l.VehicleId == id)
-                                    .OrderByDescending(l => l.TimeOfRecord)
-                                    .FirstOrDefaultAsync();
+            var currentLocation = await _vehicleTrackerService.GetCurrentVehicleLocation(id);
 
             if (currentLocation == null)
             {
@@ -75,29 +70,16 @@ namespace VehicleTracker.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (!VehicleExists(location.VehicleId))
+            var userId = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Vehicle vehicle = await _vehicleTrackerService.GetVehicleByUser(userId);
+            if (vehicle == null)
             {
                 return BadRequest("Vehicle not found");
             }
 
-            var userId = new Guid(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-            // Since one vehicle should have only one user, it's fine to use .Single here
-            if (location.VehicleId != _context.Vehicle.Single(v => v.UserId == userId).Id)
-            {
-                return BadRequest("Cannot update other vehicle's location");
-            }
-
-            location.TimeOfRecord = DateTime.UtcNow;
-            _context.Location.Add(location);
-            await _context.SaveChangesAsync();
+            await _vehicleTrackerService.RecordCurrentLocation(vehicle.Id, location);
 
             return CreatedAtAction("GetCurrentVehicleLocation", new { id = location.VehicleId }, location);
-        }
-
-        private bool VehicleExists(Guid id)
-        {
-            return _context.Vehicle.Any(e => e.Id == id);
         }
     }
 }

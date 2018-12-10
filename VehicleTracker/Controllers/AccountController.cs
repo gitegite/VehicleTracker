@@ -114,6 +114,10 @@ namespace VehicleTracker.Controllers
             [StringLength(100, ErrorMessage = "PASSWORD_MIN_LENGTH", MinimumLength = 6)]
             public string Password { get; set; }
 
+            /// <summary>
+            /// In reality, registeration should be for normal user only.
+            /// This is for testing purpose so we can register Admin user from the api.
+            /// </summary>
             [Required]
             public string[] Roles { get; set; }
         }
