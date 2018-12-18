@@ -1,9 +1,3 @@
-1) Unzip the file and open the solution
-2) In appsettings.json, GoogleAPIKey is left empty. If you don't have the key, or I have to use my own key, please contact me.
-3) Run `Update-Database` in the Package Manager Console
-3) Run the api locally via IISExpress (mslocaldb is also used)
-4) Use any HTTP REST client to test the api
-
 Simple Test (All payloads are in JSON format, don't forget to add content-type = application/json in the header):
 
 1) Register an admin user with this payload
